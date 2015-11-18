@@ -1,6 +1,6 @@
-## Single Node [Accumulo](https://accumulo.apache.org/) Instance On Docker
-
-This work is based on [https://github.com/medined/docker-accumulo](https://github.com/medined/docker-accumulo) - Thanks :-)
+## Single Node [Accumulo](https://accumulo.apache.org/) Instance On Docker sans Zookeeper, designed to be run with docker-compose
+## Multi Node  [Accumulo](https://accumulo.apache.org/) Instance, designed to be run in docker-compose, include zookeeper on separate host, use run-hadoop master and run-hadoop slave
+This work is based on [https://github.com/medined/docker-accumulo](https://github.com/medined/docker-accumulo) and [https://github.com/mraad/docker-accumulo](https://github.com/mraad/docker-accumulo) - Thanks :-)
 
 If you are using [boot2docker](http://boot2docker.io/), then you might want to up the memory and storage space.
 
@@ -31,33 +31,8 @@ sysctl vm.swappiness
 ### Build the container image
 
 ```shell
-docker build -t mraad/accumulo .
+docker build -t openwhere/accumulo .
 ```
-
-### Run the container
-
-```shell
-docker run --name accumulo -i -t -P mraad/accumulo /bin/bash
-```
-
-### Start Zookeeper, YARN, HDFS and Accumulo
-
-```shell
-/etc/start-all.sh
-```
-
-### Stop Accumulo, HDFS, YARN and Zookeeper
-
-```shell
-/etc/stop-all.sh
-```
-
-### See all exposed ports
-
-```shell
-docker port accumulo | sort -t / -n
-```
-
 
 In this line sample `50070/tcp -> 0.0.0.0:49161`, the internal port `50070` is mapped to `49161` on the host OS.
 
@@ -77,7 +52,7 @@ bash-4.1# accumulo shell -u root -p secret
 
 Shell - Apache Accumulo Interactive Shell
 -
-- version: 1.5.2
+- version: 1.6.4
 - instance name: accumulo
 - instance id: 57fdffe2-5a38-48dd-934f-5d2db507027d
 -
