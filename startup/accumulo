@@ -1,0 +1,57 @@
+#!/bin/sh
+# chkconfig: 345 90 10
+# description: Accumulo Startup
+
+# Set up some global env vars
+export HADOOP_PREFIX=/usr/local/hadoop
+export ZOOKEEPER_HOME=/usr/local/zookeeper
+export ACCUMULO_HOME=/usr/local/accumulo
+export JAVA_HOME=/usr/java/default
+
+start() {
+    $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
+    rm /tmp/*.pid
+    cd $HADOOP_PREFIX/share/hadoop/common ; for cp in ${ACP//,/ }; do  echo == $cp; curl -LO $cp ; done; cd -
+
+    sed "s/HOSTNAME/$HOSTNAME/g" /usr/local/hadoop/etc/hadoop/core-site.xml.template > /usr/local/hadoop/etc/hadoop/core-site.xml
+    sed "s/HOSTNAME/$HOSTNAME/g" /usr/local/accumulo/conf/accumulo-site-template.xml > /usr/local/accumulo/conf/accumulo-site.xml.tmp
+    sed "s/ZOOKEEPERHOST/$HOSTNAME/g" /usr/local/accumulo/conf/accumulo-site-template.xml.tmp > /usr/local/accumulo/conf/accumulo-site.xml
+    rm -f /usr/local/accumulo/conf/accumulo-site-template.xml.tmp
+    echo $HOSTNAME > /usr/local/accumulo/conf/gc
+    echo $HOSTNAME > /usr/local/accumulo/conf/masters
+    echo $HOSTNAME > /usr/local/accumulo/conf/monitor
+    echo $HOSTNAME > /usr/local/accumulo/conf/slaves
+    echo $HOSTNAME > /usr/local/accumulo/conf/tracers
+
+    service sshd start
+    $HADOOP_PREFIX/sbin/start-dfs.sh
+    $HADOOP_PREFIX/bin/hdfs dfsadmin -safemode wait
+    $HADOOP_PREFIX/sbin/start-yarn.sh
+    if [ ! -f $ACCUMULO_HOME/.isinit ]; then
+      $ACCUMULO_HOME/bin/accumulo init --instance-name accumulo --password secret
+      echo "true" > $ACCUMULO_HOME/.isinit
+    fi
+    $ACCUMULO_HOME/bin/start-all.sh
+}
+
+stop() {
+    $ACCUMULO_HOME/bin/stop-all.sh
+    $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
+    $HADOOP_PREFIX/sbin/stop-yarn.sh
+    $HADOOP_PREFIX/sbin/stop-dfs.sh
+    service sshd stop
+}
+
+opt=$1
+case $opt in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    *)
+        echo "Usage: $0 {start|stop}"
+        RETVAL=1
+esac
+exit 0
