@@ -4,6 +4,8 @@ set -e
 
 
 master() {
+    echo "Waiting 5 seconds for slaves to start up"
+    sleep 5
     $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
     rm /tmp/*.pid
     cd $HADOOP_PREFIX/share/hadoop/common ; for cp in ${ACP//,/ }; do  echo == $cp; curl -LO $cp ; done; cd -
@@ -34,8 +36,6 @@ master() {
         echo $slave >> /usr/local/accumulo/conf/tracers
       done
 
-    # allow slaves to start up
-    sleep 5
     service sshd start
     $HADOOP_PREFIX/bin/hdfs namenode -format
     $HADOOP_PREFIX/sbin/start-dfs.sh
