@@ -39,7 +39,9 @@ master() {
     service sshd start
     $HADOOP_PREFIX/bin/hdfs namenode -format
     $HADOOP_PREFIX/sbin/start-dfs.sh
+    echo "Waiting 5 seconds for DFS to start up:"
     netstat -an | grep LISTEN
+    sleep 5
     $HADOOP_PREFIX/bin/hdfs dfsadmin -safemode wait
     $HADOOP_PREFIX/sbin/start-yarn.sh
     if [ ! -f /usr/local/accumulo/.isinit ]; then
